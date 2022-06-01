@@ -123,9 +123,9 @@ def get_package_version(tools_version):
         hash = tools_version[:8]
     elif full_version_matcher.match(tools_version):
         matched = full_version_matcher.match(tools_version)
-        version = matched.group(1)
-        commits = matched.group(2)
-        hash = matched.group(3)[:8]
+        version = matched[1]
+        commits = matched[2]
+        hash = matched[3][:8]
     return f"{ version }.dev{ commits }+g{ hash }"
 
 
@@ -179,9 +179,9 @@ def github_release_download(version: str):
         wget(release_url)
     except urllib.error.HTTPError as error:
         retry_likely = "404" not in str(error)
-        retry_error = f"Retrying will likely resolve the problem."
         # Check if this is a real error or not available error
         if retry_likely:
+            retry_error = "Retrying will likely resolve the problem."
             print(f"-- INFO  -- { retry_error }", file=sys.stderr)
             sys.exit(-1)
 
@@ -286,7 +286,6 @@ def clean_install_fpp():
 
     def lazy_loader():
         """Prevents the download of FPP items until actually enumerated"""
-        for item in iterate_fpp_tools(WORKING_DIR):
-            yield item
+        yield from iterate_fpp_tools(WORKING_DIR)
 
     yield lazy_loader()
